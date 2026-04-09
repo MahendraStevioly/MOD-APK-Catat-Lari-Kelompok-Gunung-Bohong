@@ -42,7 +42,7 @@ class LoginFragment : Fragment() {
                     Toast.makeText(requireContext(), "Password Anda salah!", Toast.LENGTH_SHORT).show()
                 // jika password benar, maka berpindah ke MainActivity
                 else {
-                    val userLogin = user(email = emailUser, password= passwordUser)
+                    val userLogin = User(email = emailUser, password= passwordUser)
                     // berpindah ke MainActivity
                     val intent = Intent(requireContext(), MainActivity::class.java)
                     startActivity(intent)
