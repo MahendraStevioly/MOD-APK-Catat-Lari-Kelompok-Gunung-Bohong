@@ -1,17 +1,21 @@
-package com.upn.catatlari
+package com.upn.catatlari.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.upn.catatlari.databinding.FragmentHomeBinding
+import com.upn.catatlari.model.Run
+import com.upn.catatlari.viewmodel.RunViewModel
 
 class HomeFragment : Fragment() {
 
-    private lateinit var  binding: FragmentHomeBinding
+    private lateinit var binding: FragmentHomeBinding
+    private val runViewModel: RunViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -21,19 +25,16 @@ class HomeFragment : Fragment() {
         binding.welcomingTxt.text = "Halo, ${user?.email}"
 
         binding.floatingBtnAddRun.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToAddRunFragment())
+            findNavController().navigate(HomeFragmentDirections.Companion.actionHomeFragmentToAddRunFragment())
         }
-
-        val runList = listOf(
-            Run(runDate = "22 Mei 2026", runDistance = 1, runDuration = 3),
-            Run(runDate = "23 Mei 2026", runDistance = 1, runDuration = 3),
-            Run(runDate = "24 Mei 2026", runDistance = 1, runDuration = 3)
-        )
 
         val runAdapter = RunAdapter()
 
         binding.rvRunList.layoutManager = LinearLayoutManager(requireContext())
-        runAdapter.setData(runList)
+        runViewModel.runHistory.observe(viewLifecycleOwner) { runList ->
+            runAdapter.setData(runList)
+        }
+
         binding.rvRunList.adapter = runAdapter
 
         return binding.root
