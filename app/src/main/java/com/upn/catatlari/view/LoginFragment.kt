@@ -7,42 +7,54 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.upn.catatlari.R
 import com.upn.catatlari.databinding.FragmentLoginBinding
-import com.upn.catatlari.model.User
+import com.upn.catatlari.viewmodel.UserViewModel
 
 class LoginFragment : Fragment() {
 
     private lateinit var loginBinding: FragmentLoginBinding
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        // Inflate the layout for this fragment
         loginBinding = FragmentLoginBinding.inflate(inflater, container, false)
-
         return loginBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Observasi hasil login
+        userViewModel.loginResult.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                // Login Berhasil
+                val intent = Intent(requireContext(), MainActivity::class.java)
+                intent.putExtra("user", user)
+                startActivity(intent)
+                requireActivity().finish() // Tutup LoginActivity agar tidak bisa kembali ke login
+            } else {
+                // Login Gagal
+                Toast.makeText(requireContext(), "Email atau Password salah!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         loginBinding.buttonLogin.setOnClickListener {
             val emailUser = loginBinding.etEmail.text.toString()
             val passwordUser = loginBinding.etPassword.text.toString()
 
-            if (emailUser.isEmpty() || passwordUser.isEmpty())
-                Toast.makeText(requireContext(), "Silahkan masukkan email/password, bro!", Toast.LENGTH_SHORT).show()
-            else {
-                // jika password salah, muncul pesan error
-                if (passwordUser != "123456")
-                    Toast.makeText(requireContext(), "Password Anda salah!", Toast.LENGTH_SHORT).show()
-                // jika password benar, maka berpindah ke MainActivity
-                else {
-                    // berpindah ke MainActivity
-                    val intent = Intent(requireContext(), MainActivity::class.java)
-                    intent.putExtra("user", User(email = emailUser, password = passwordUser))
-                    startActivity(intent)
-                }
+            if (emailUser.isEmpty() || passwordUser.isEmpty()) {
+                Toast.makeText(requireContext(), "Silahkan masukkan email/password!", Toast.LENGTH_SHORT).show()
+            } else {
+                // Panggil fungsi login di ViewModel (cek ke database)
+                userViewModel.login(emailUser, passwordUser)
             }
+        }
 
+        // Navigasi ke halaman Register jika belum punya akun
+        loginBinding.txtSignup.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
 }

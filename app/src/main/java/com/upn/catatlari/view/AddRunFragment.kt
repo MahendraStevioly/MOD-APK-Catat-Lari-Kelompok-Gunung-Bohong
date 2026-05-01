@@ -4,37 +4,112 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.upn.catatlari.databinding.FragmentAddRunBinding
 import com.upn.catatlari.model.Run
 import com.upn.catatlari.viewmodel.RunViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 class AddRunFragment : Fragment() {
 
     private lateinit var binding: FragmentAddRunBinding
-    val runViewModel: RunViewModel by activityViewModels()
+    private val runViewModel: RunViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        // Inflate the layout for this fragment
         binding = FragmentAddRunBinding.inflate(inflater, container, false)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnSaveRun.setOnClickListener {
-            val runDate = binding.etDate.text.toString()
-            val runDuration = binding.etRunDuration.text.toString()
-            val runDistance = binding.etRunDistance.text.toString()
+        // 1. Setup Date Picker
+        binding.etDate.setOnClickListener {
+            showDatePicker()
+        }
 
-            val runInput = Run(runDate = runDate, runDuration = runDuration.toInt(), runDistance = runDistance.toInt())
+        // 2. Setup Time Picker untuk Durasi
+        binding.etRunDuration.setOnClickListener {
+            showTimePicker()
+        }
+
+        // 3. Logika Simpan
+        binding.btnSaveRun.setOnClickListener {
+            saveRun()
+        }
+    }
+
+    private fun showDatePicker() {
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Pilih Tanggal Lari")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+            calendar.timeInMillis = selection
+            val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            binding.etDate.setText(format.format(calendar.time))
+        }
+
+        datePicker.show(parentFragmentManager, "DATE_PICKER")
+    }
+
+    private fun showTimePicker() {
+        val timePicker = MaterialTimePicker.Builder()
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setHour(0)
+            .setMinute(30)
+            .setTitleText("Pilih Durasi (Jam:Menit)")
+            .build()
+
+        timePicker.addOnPositiveButtonClickListener {
+            val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", timePicker.hour, timePicker.minute)
+            binding.etRunDuration.setText(formattedTime)
+        }
+
+        timePicker.show(parentFragmentManager, "TIME_PICKER")
+    }
+
+    private fun saveRun() {
+        val date = binding.etDate.text.toString()
+        val distanceStr = binding.etRunDistance.text.toString()
+        val durationStr = binding.etRunDuration.text.toString()
+
+        if (date.isEmpty() || distanceStr.isEmpty() || durationStr.isEmpty()) {
+            Toast.makeText(requireContext(), "Harap lengkapi semua data!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            // Konversi durasi ke menit total (contoh: 01:30 -> 90 menit)
+            val timeParts = durationStr.split(":")
+            val totalMinutes = (timeParts[0].toInt() * 60) + timeParts[1].toInt()
+            
+            // Konversi jarak ke integer (misal: 5.5 km -> 5500 meter atau biarkan float jika model mendukung)
+            // Di model Run, runDistance adalah Int, jadi kita asumsikan meter atau dibulatkan
+            val distance = distanceStr.toDouble().toInt() 
+
+            val runInput = Run(
+                runDate = date,
+                runDuration = totalMinutes,
+                runDistance = distance
+            )
 
             runViewModel.addRun(runInput)
-            findNavController().popBackStack() // kembali ke halaman sebelumnya
+            Toast.makeText(requireContext(), "Data lari berhasil disimpan!", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Input tidak valid!", Toast.LENGTH_SHORT).show()
         }
     }
 }

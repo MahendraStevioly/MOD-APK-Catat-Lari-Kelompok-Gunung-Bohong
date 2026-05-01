@@ -7,6 +7,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".view.WelcomeFragment">
 
+    <!-- Panggil namanya saja -->
+
+    <ImageView
+        android:layout_width="289dp"
+        android:layout_height="278dp"
+        android:layout_marginStart="41dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="61dp"
+        android:src="@drawable/logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/btn_signup"
         android:layout_width="0dp"

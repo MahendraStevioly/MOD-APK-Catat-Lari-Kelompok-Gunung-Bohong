@@ -17,14 +17,15 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
+
     <TextView
         android:id="@+id/ask_txt"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Apa kabarmu hari ini?"
+        android:text="Ini Catatan Larimu Semua"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="@id/welcoming_txt"
-        app:layout_constraintTop_toBottomOf="@id/welcoming_txt"/>
+        app:layout_constraintTop_toBottomOf="@id/welcoming_txt" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floating_btn_add_run"
