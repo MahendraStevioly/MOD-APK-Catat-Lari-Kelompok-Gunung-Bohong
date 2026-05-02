@@ -1,5 +1,6 @@
 package com.upn.catatlari.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -32,7 +33,12 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnLogout.setOnClickListener { 
-            requireActivity().finish() 
+            // Pindah ke AuthActivity (Halaman Login/Welcome)
+            val intent = Intent(requireContext(), AuthActivity::class.java)
+            // Menghapus history activity sebelumnya agar tidak bisa di-back ke Profile
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 }
